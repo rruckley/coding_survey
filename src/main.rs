@@ -1,8 +1,16 @@
 
 use log::{info,error};
 use gitlab::Gitlab;
-use gitlab::api::{self,projects, Query};
+use gitlab::api::{raw, self, projects, Client, Endpoint, Query, RestClient};
+use serde::{Deserialize};
+use std::collections::HashMap;
 
+#[derive(Debug, Deserialize)]
+struct Project {
+    id: u16,
+    name: String,
+    _links: HashMap<String,String>,
+}
 
 fn main() {
     env_logger::init();
@@ -12,21 +20,27 @@ fn main() {
 
     let gitlab_host = match std::env::var("GITLAB_HOST") {
         Ok(h) => h,
-        Err(e) => panic!("Cannot proceed without host"),
+        Err(_e) => panic!("Cannot proceed without host"),
     };
 
     let gitlab_token = match std::env::var("GITLAB_TOKEN") {
         Ok(t) => t,
-        Err(e) => panic!("Cannnot proceed without Token")
+        Err(_e) => panic!("Cannnot proceed without Token")
     };
 
     info!("Starting {} v{}",pkg,ver);
 
     info!("Using Gitlab: {}",gitlab_host);
 
-    let client =Gitlab::new(gitlab_host, gitlab_token);
+    let client =Gitlab::new(gitlab_host, gitlab_token).unwrap();
 
-    let endpoint = projects::Projects::
+    let endpoint : Vec<Project> =projects::Projects::builder()
+        .build()
+        .unwrap()
+        .query(&client)
+        .unwrap();
 
-    dbg!(endpoint);
+    for e in endpoint {
+        info!("Pulling language info: {}",e.name);
+    }
 }
