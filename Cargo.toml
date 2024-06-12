@@ -1,0 +1,12 @@
+[package]
+name = "coding_survey"
+version = "0.1.0"
+edition = "2021"
+authors = ["Ryan Ruckley <rruckley@gmail.com>"]
+description = "A tool to scrape project / language data from GitLab Cloud"
+
+[dependencies]
+clap = "4.5.7"
+env_logger = "0.11.3"
+gitlab = { version = "0.1700.1", features = ["rustls"] }
+log = "0.4.21"
