@@ -34,13 +34,15 @@ fn main() {
 
     let client =Gitlab::new(gitlab_host, gitlab_token).unwrap();
 
-    let endpoint : Vec<Project> =projects::Projects::builder()
+    let endpoint =projects::Projects::builder()
         .build()
-        .unwrap()
+        .unwrap();
+    let first_200 :Vec<Project> = api::paged(endpoint, api::Pagination::Limit(200))
         .query(&client)
         .unwrap();
 
-    for e in endpoint {
-        info!("Pulling language info: {}",e.name);
+    info!("Found {} projects",first_200.len());
+    for e in first_200 {
+        info!("Pulling language info: {} [{}]",e.name,e.id);
     }
 }
