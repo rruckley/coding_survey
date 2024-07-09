@@ -3,14 +3,14 @@ use log::{info,error};
 use gitlab::Gitlab;
 use gitlab::api::{raw, self, projects, Client, Endpoint, Query, RestClient};
 use serde::{Deserialize};
-use serde_json::Result;
-use serde_json::value;
 use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
 struct Project {
     id: u16,
     name: String,
+    name_with_namespace : String,
+    path_with_namespace: String,
     _links: HashMap<String,String>,
 }
 
@@ -61,6 +61,7 @@ fn main() {
     info!("Found {} projects",first_200.len());
     for e in first_200 {
         info!("Pulling language info: {} [{}]",e.name,e.id);
+        
         let url = format!("https://{}/api/v4/projects/{}/languages",gitlab_host,e.id);
         // info!("Calling url: {}",url);
         let client = reqwest::blocking::Client::new();
@@ -76,7 +77,7 @@ fn main() {
                 // info!("Got a response: {}",&body);
                 let obj : Languages = serde_json::from_str(body.as_str()).unwrap();
                 // dbg!(&obj);
-                output.insert(e.name, obj);
+                output.insert(e.path_with_namespace, obj);
             }
             Err(e) => {
                 error!("Could not get response: {}",e);
